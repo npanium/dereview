@@ -41,11 +41,11 @@ contract ReviewerSBT is ERC721, IERC5484, Ownable {
     }
 
     function mint(address to, string memory tagType) public {
-        tokenIdToTagTypeHash[tokenId] = tagTypesHash[tagType];
-        userToTokenIds[to].push(tokenId);
+        uint256 currentTokenId = tokenId;
+        tokenIdToTagTypeHash[currentTokenId] = tagTypesHash[tagType];
+        userToTokenIds[to].push(currentTokenId);
         tokenId++;
-        _mint(to, tokenId);
-
+        _mint(to, currentTokenId);
 
         emit Issued(msg.sender, to, tokenId, burnAuthorization);
     }

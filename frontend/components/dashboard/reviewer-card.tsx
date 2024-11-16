@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-
+import { useAccount } from "wagmi";
 import { useReadContracts, 
   useReadContract, useWriteContract,
 useWaitForTransactionReceipt } from "wagmi";
@@ -36,10 +36,13 @@ export default function ReviewerCard({
   const {data:hash, writeContract} = useWriteContract()
   const {data:receipt, isLoading, isSuccess, isError, error, data} = useWaitForTransactionReceipt({hash})
   const { toast } = useToast();
+  const { address: userAddress } = useAccount();
   const client = createPublicClient({
     chain: baseSepolia,
     transport: http()
   });
+
+  console.log("address", address);
 
   useEffect(() => {
     const fetchBalance = async () => {
@@ -95,20 +98,30 @@ export default function ReviewerCard({
   });
 
   console.log("contractReads",contractReads);
+  console.log("tagTypeHash", tagTypesHash);
   console.log("balance", balance);
   console.log("tagTypes", tagTypes);
 
-
+  const { data: tagsByUser } = useReadContract({
+    address: process.env.NEXT_PUBLIC_REVIEWER_SBT_ADDRESS as `0x${string}`,
+    abi: ReviewerSBT.abi,
+    functionName: "getTagsByUser",
+    args: [userAddress as `0x${string}`],
+  });
+  console.log("tagsByUser", tagsByUser);
   const expertise = ["Blockchain", "Smart Contracts"]; // Placeholder expertise tags
+  
   const addReviewer = async () => {
     console.log("applyForReview");
     setIsApplying(true);
     try {
+     
+
       writeContract({
         address: address as `0x${string}`,
-      abi: ReviewPool.abi,
-      functionName: "addReviewer",
-      args: ["0"]
+        abi: ReviewPool.abi,
+        functionName: "addReviewer",
+        args: [0]
       });
     } catch (error) {
       console.error("Error applying for review:", error);
@@ -179,7 +192,7 @@ export default function ReviewerCard({
             ))}
           </div>
           <div className="flex justify-end">
-            <Button variant="outline" onClick={addReviewer} disabled={isApplying}>
+            <Button variant="outline" onClick={()=>addReviewer()} disabled={isApplying}>
               {isApplying ? "Applying..." : "Apply for Review"}
             </Button>
           </div>
