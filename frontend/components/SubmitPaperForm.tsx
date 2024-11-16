@@ -86,7 +86,7 @@ export default function SubmitPaperForm({ onSuccess }: SubmitPaperFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { address } = useAccount();
   const { data: hash, isSuccess, writeContract } = useWriteContract();
-  const { data: receipt } = useWaitForTransactionReceipt();
+  const { data: receipt, isSuccess: receiptSuccess } = useWaitForTransactionReceipt();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -185,7 +185,7 @@ export default function SubmitPaperForm({ onSuccess }: SubmitPaperFormProps) {
   }, [hash]);
 
   useEffect(() => {
-    if (isSuccess) {
+    if (receiptSuccess) {
       toast({
         title: "✅ Peer Review Pool Created",
         description: (
@@ -205,7 +205,7 @@ export default function SubmitPaperForm({ onSuccess }: SubmitPaperFormProps) {
       setLoading(false);
       setIsSubmitting(false);
     }
-  }, [receipt]);
+  }, [receiptSuccess]);
   return (
     <Card className="w-full max-w-3xl mx-auto border-gray-800 ">
       <CardHeader>

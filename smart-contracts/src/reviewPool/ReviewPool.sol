@@ -19,7 +19,7 @@ contract ReviewPool is Initializable {
     bytes32 public tagTypesHash;
     string public paperUri;
     string public paperTitle;
-
+    address public author;
     address[] public reviewersList;
     string[] private reviews;
     mapping(address => string) private reviewerToReview;
@@ -39,7 +39,8 @@ contract ReviewPool is Initializable {
         bytes32 _tagTypesHash, 
         string memory _paperUri,
         string memory _paperTitle,
-        address _SBTAddress) external payable initializer {
+        address _SBTAddress,
+        address _author) external payable initializer {
         if(msg.value == 0) revert ReviewPool__InvalidPayment();
         if(_reviewers == 0) revert ReviewPool__InvalidReviewers();
         if(bytes(_paperUri).length == 0) revert ReviewPool__EmptyPaperUri();
@@ -49,6 +50,8 @@ contract ReviewPool is Initializable {
         paperUri = _paperUri;
         reviewProgress = 0;
         REVIEWER_SBT_ADDRESS = _SBTAddress;
+        paperTitle = _paperTitle;
+        author = _author;
     }
 
     function addReviewer(uint256 _tokenId) public {

@@ -8,6 +8,7 @@ import {IERC5484} from "../interfaces/IERC5484.sol";
 
 error ReviewerSBT__NonTransferableToken();
 error ReviewerSBT__NonExistentToken();
+error ReviewerSBT__NonExistentTagType();
 
 contract ReviewerSBT is ERC721, IERC5484, Ownable {
     
@@ -15,6 +16,7 @@ contract ReviewerSBT is ERC721, IERC5484, Ownable {
     string[] public tagTypes;
     mapping(string => bytes32) public tagTypesHash;
     mapping(uint256 => bytes32) public tokenIdToTagTypeHash;
+    mapping(address => uint256[]) public userToTokenIds;
 
     BurnAuth internal burnAuthorization;
 
@@ -40,8 +42,10 @@ contract ReviewerSBT is ERC721, IERC5484, Ownable {
 
     function mint(address to, string memory tagType) public {
         tokenIdToTagTypeHash[tokenId] = tagTypesHash[tagType];
-        _mint(to, tokenId);
+        userToTokenIds[to].push(tokenId);
         tokenId++;
+        _mint(to, tokenId);
+
 
         emit Issued(msg.sender, to, tokenId, burnAuthorization);
     }
@@ -70,6 +74,15 @@ contract ReviewerSBT is ERC721, IERC5484, Ownable {
         burnAuthorization = _burnAuthorization;
     }
 
+    function getTagsByUser(address user) public view returns (string[] memory) {
+        uint256[] memory tokenIds = userToTokenIds[user];
+        string[] memory tags = new string[](tokenIds.length);
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            tags[i] = getTagTypeFromHash(tokenIdToTagTypeHash[tokenIds[i]]);
+        }
+        return tags;
+    }
+
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721) returns (bool) {
         return
             interfaceId == type(IERC5484).interfaceId ||
@@ -84,6 +97,15 @@ contract ReviewerSBT is ERC721, IERC5484, Ownable {
 
     function getAllTagTypes() public view returns (string[] memory) {
         return tagTypes;
+    }
+
+    function getTagTypeFromHash(bytes32 tagTypeHash) public view returns (string memory) {
+        for (uint256 i = 0; i < tagTypes.length; i++) {
+            if (tagTypesHash[tagTypes[i]] == tagTypeHash) {
+                return tagTypes[i];
+            }
+        }
+        revert ReviewerSBT__NonExistentTagType();
     }
 
     function getTagTypeHash(uint256 _tokenId) public view returns (bytes32) {

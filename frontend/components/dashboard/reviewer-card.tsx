@@ -9,12 +9,20 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tag } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
-import { useReadContracts } from "wagmi";
+import { useReadContracts, 
+  useReadContract, useWriteContract,
+useWaitForTransactionReceipt } from "wagmi";
 import { getBalance } from "viem/actions";
 import { baseSepolia } from "viem/chains";
 import ReviewPool from "@/lib/abi/ReviewPool.json";
 import { createPublicClient, http } from 'viem';
+import { useState, useEffect } from "react";
+import { formatEther } from 'viem';
+
+import ReviewerSBT from "@/lib/abi/ReviewerSBT.json";
 
 interface ReviewerCardProps {
   address: string;
@@ -23,14 +31,30 @@ interface ReviewerCardProps {
 export default function ReviewerCard({
   address,
 }: ReviewerCardProps) {
+  const [balance, setBalance] = useState<bigint | null>(null);
+  const [isApplying, setIsApplying] = useState(false);
+  const {data:hash, writeContract} = useWriteContract()
+  const {data:receipt, isLoading, isSuccess, isError, error, data} = useWaitForTransactionReceipt({hash})
+  const { toast } = useToast();
   const client = createPublicClient({
     chain: baseSepolia,
     transport: http()
   });
 
-  const balance = getBalance(client, {
-    address: address as `0x${string}`
-  });
+  useEffect(() => {
+    const fetchBalance = async () => {
+      try {
+        const result = await getBalance(client, {
+          address: address as `0x${string}`,
+        });
+        setBalance(result);
+      } catch (error) {
+        console.error("Error fetching balance:", error);
+      }
+    };
+
+    fetchBalance();
+  }, [address, client]);
 
   const { data: contractReads } = useReadContracts({
     contracts: [
@@ -52,29 +76,113 @@ export default function ReviewerCard({
       {
         address: address as `0x${string}`,
         abi: ReviewPool.abi,
-        functionName: "requiredReviewers"
+        functionName: "requiredReviewerNumber"
       },
+      {
+        address: address as `0x${string}`,
+        abi: ReviewPool.abi,
+        functionName: "author"
+      }
     ]
   });
+  const [name = "", uri = "", author = "", tagTypesHash = "", requiredReviewers = ""] = contractReads?.map(read => read.result as string) ?? [];
 
-  console.log(contractReads);
+  const { data: tagTypes } = useReadContract({
+    address: process.env.NEXT_PUBLIC_REVIEWER_SBT_ADDRESS as `0x${string}`,
+    abi: ReviewerSBT.abi,
+    functionName: "getTagTypeFromHash",
+    args: [tagTypesHash],
+  });
 
-  const [name, description, uri, tagTypesHash, requiredReviewers] = contractReads?.map(read => read.result as string) ?? ["", "", "", "", ""];
+  console.log("contractReads",contractReads);
+  console.log("balance", balance);
+  console.log("tagTypes", tagTypes);
+
+
   const expertise = ["Blockchain", "Smart Contracts"]; // Placeholder expertise tags
+  const addReviewer = async () => {
+    console.log("applyForReview");
+    setIsApplying(true);
+    try {
+      writeContract({
+        address: address as `0x${string}`,
+      abi: ReviewPool.abi,
+      functionName: "addReviewer",
+      args: ["0"]
+      });
+    } catch (error) {
+      console.error("Error applying for review:", error);
+    } finally {
+      setIsApplying(false);
+    }
+  }
+
+  useEffect(() => {
+    if (hash !== undefined) {
+      toast({
+        title: "Applying for Review",
+        description: (
+          <span>
+            Check tx on{" "}
+            <a
+              href={`https://base-sepolia.blockscout.com/tx/${hash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-blue-500 hover:text-blue-600"
+            >
+              Blockscout
+            </a>
+          </span>
+        ),
+      });
+    }
+  }, [hash]);
+
+  useEffect(() => {
+    if (receipt) {
+      toast({
+        title: "✅ Successfully Applied",
+        description: (
+          <span>
+            See transaction on{" "}
+            <a
+              href={`https://base-sepolia.blockscout.com/tx/${hash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-blue-500 hover:text-blue-600"
+            >
+              Blockscout
+            </a>
+          </span>
+        ),
+      });
+      setIsApplying(false);
+    }
+  }, [receipt]);
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>{name}</CardTitle>
-        <CardDescription>{description}</CardDescription>
+        <CardDescription>{uri}</CardDescription>
+        <CardDescription>{author}</CardDescription>
+        <p className="text-sm text-gray-500">Bounty: {balance ? formatEther(balance) : '0'} ETH</p>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-wrap gap-2">
-          {expertise.map((tag) => (
-            <Badge key={tag} variant="secondary">
-              <Tag className="h-3 w-3 mr-1" />
-              {tag}
-            </Badge>
-          ))}
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-wrap gap-2">
+            {Array.isArray(tagTypes) && tagTypes.map((tag: string) => (
+              <Badge key={tag} variant="secondary">
+                <Tag className="h-3 w-3 mr-1" />
+                {tag}
+              </Badge>
+            ))}
+          </div>
+          <div className="flex justify-end">
+            <Button variant="outline" onClick={addReviewer} disabled={isApplying}>
+              {isApplying ? "Applying..." : "Apply for Review"}
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

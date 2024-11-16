@@ -34,7 +34,8 @@ contract ReviewPoolFactory is Ownable {
             _tagTypesHash,
             _paperUri,
             _paperTitle,
-            REVIEWER_SBT_ADDRESS
+            REVIEWER_SBT_ADDRESS,
+            msg.sender
         );
         reviewPoolToAddress[reviewPoolCount] = clone;
         addressToReviewPools[msg.sender].push(reviewPoolCount);
