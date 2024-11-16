@@ -18,11 +18,25 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useEffect, useState } from "react";
 import { Link2, Coins, Users } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { useState } from "react";
+import { useAccount } from "wagmi";
+import { useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi";
+import { parseEther } from "viem";
+import ReviewPoolFactory from "@/lib/abi/ReviewPoolFactory.json";
+import reviewerSBTAbi from "@/lib/abi/ReviewerSBT.json";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 const formSchema = z.object({
   title: z
     .string()
@@ -45,7 +59,7 @@ const formSchema = z.object({
   }),
   bounty: z
     .number()
-    .min(0.1, { message: "Minimum bounty is 0.1 ETH" })
+    .min(0.01, { message: "Minimum bounty is 0.01 ETH" })
     .max(100, { message: "Maximum bounty is 100 ETH" })
     .refine((val) => !isNaN(val), {
       message: "Please enter a valid number",
@@ -71,32 +85,114 @@ interface SubmitPaperFormProps {
 
 export default function SubmitPaperForm({ onSuccess }: SubmitPaperFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { address } = useAccount();
+  const { data:hash, isSuccess, writeContract } = useWriteContract();
+  const { data: receipt } = useWaitForTransactionReceipt();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
       topic: "",
       paperLink: "",
-      bounty: 0.1,
+      bounty: 0.01,
       reviewersCount: 3,
       //   abstract: "",
     },
   });
+
+  const { data: skillsList } = useReadContract({
+    address: process.env.NEXT_PUBLIC_REVIEWER_SBT_ADDRESS as `0x${string}`,
+    abi: reviewerSBTAbi.abi,
+    functionName: "getAllTagTypes",
+    args: [],
+  });
+  const topic = form.watch("topic");
+  console.log("topic", topic);
+
+  const {data: tagHash} = useReadContract({
+    address: process.env.NEXT_PUBLIC_REVIEWER_SBT_ADDRESS as `0x${string}`,
+    abi: reviewerSBTAbi.abi,
+    functionName: "tagTypesHash",
+    args: [topic],
+  });
+
+  console.log("tagHash", tagHash);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsSubmitting(true);
       console.log(values);
       // Your submission logic here
+      try {
+        writeContract({
+          address: process.env.NEXT_PUBLIC_REVIEW_POOL_FACTORY_ADDRESS as `0x${string}`,
+          abi: ReviewPoolFactory.abi,
+          functionName: "createReviewPool",
+          args: [
+            tagHash,
+            values.paperLink,
+             values.reviewersCount],
+          value: parseEther(values.bounty.toString()),
+        });
+        setLoading(true);
 
-      // Call onSuccess callback to close the dialog
-      onSuccess?.();
+      } catch (error) {
+        console.error(error);
+        toast({
+          title: "❌ Error",
+          variant: "destructive",
+          description: "Failed to submit paper",
+        });
+      }
     } catch (error) {
       console.error(error);
-    } finally {
+    } 
+  }
+  useEffect(() => {
+    if (hash !== undefined) {
+      toast({
+        title: "Minting skills credentials",
+        description: (
+          <span>
+            Check tx on{" "}
+            <a
+              href={`https://base-sepolia.blockscout.com/tx/${hash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-blue-500 hover:text-blue-600"
+            >
+              Blockscout
+            </a>
+          </span>
+        ),
+      });
+    }
+  }, [hash]);
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast({
+        title: "✅ Skills Credential Minted",
+        description: (
+          <span>
+            See your credential on{" "}
+            <a
+              href={`https://base-sepolia.blockscout.com/tx/${hash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-blue-500 hover:text-blue-600"
+            >
+              Blockscout
+            </a>
+          </span>
+        ),
+      });
+      setLoading(false);
       setIsSubmitting(false);
     }
-  }
+  }, [receipt]);
   return (
     <Card className="w-full max-w-3xl mx-auto border-gray-800 ">
       <CardHeader>
@@ -109,7 +205,7 @@ export default function SubmitPaperForm({ onSuccess }: SubmitPaperFormProps) {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(() => onSubmit(form.getValues()))} className="space-y-6">
             <FormField
               control={form.control}
               name="title"
@@ -135,11 +231,18 @@ export default function SubmitPaperForm({ onSuccess }: SubmitPaperFormProps) {
                 <FormItem>
                   <FormLabel>Research Topic</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="e.g., Machine Learning, Cryptography"
-                      {...field}
-                      className=" border-gray-700"
-                    />
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <SelectTrigger className="border-gray-700">
+                        <SelectValue placeholder="Select a research topic" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {skillsList !== undefined && (skillsList as Array<string>).map((skill: string) => (
+                          <SelectItem key={skill} value={skill}>
+                            {skill}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormDescription>
                     Main research area of your paper
@@ -192,7 +295,7 @@ export default function SubmitPaperForm({ onSuccess }: SubmitPaperFormProps) {
                         <Coins className="h-4 w-4 text-gray-400" />
                         <Input
                           type="number"
-                          step="0.1"
+                          step="0.01"
                           {...field}
                           className=" border-gray-700"
                         />

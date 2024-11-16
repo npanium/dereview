@@ -56,10 +56,13 @@ export default function AccountPage() {
 
   const { fundWallet } = useFundWallet();
 
+  console.log(JSON.stringify(wallet));
+  const token = {};
+
   console.log("wallet:", JSON.stringify(wallet));
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <Card className="bg-gray-800/50 border-gray-700">
+      <Card className="bg-gray-800/10 border-gray-700">
         <CardHeader className="space-y-6">
           <div className="flex justify-between items-center">
             <CardTitle className="text-2xl font-bold">
@@ -73,18 +76,18 @@ export default function AccountPage() {
               Logout
             </Button>
           </div>
-
           <Identity
             address={wallet?.address as Address}
             schemaId="0xf8b05c79f090979bf4a80270aba232dff11a10d9ca55c4f88de95317970f0de9"
           >
-            {/* <Avatar /> */}
+            <Avatar />
             <Name>
               <Badge />
             </Name>
             {/* <Address /> */}
           </Identity>
-          <div className="text-sm text-gray-400">
+
+          <div className="text-sm text-gray-800">
             Connected as{" "}
             {user?.email?.address || user?.wallet?.address || "Anonymous"}
           </div>
@@ -187,15 +190,13 @@ export default function AccountPage() {
             )}
           </div>
 
-            {/* Skills Section */}
+          {/* Skills Section */}
           <div className="flex items-center justify-between p-4 rounded-lg bg-gray-800/30 border border-gray-700">
-          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3">
               <BookMarked className="w-5 h-5 text-[#432d5e]" />
               <div>
                 <div className="font-medium">Skills</div>
-                <div className="text-sm text-gray-400">
-                  {"Add new skills"}
-                </div>
+                <div className="text-sm text-gray-400">{"Add new skills"}</div>
               </div>
             </div>
             <SkillsDialogue

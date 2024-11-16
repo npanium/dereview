@@ -66,14 +66,14 @@ export default function SkillsDialog({
   } = useWaitForTransactionReceipt({ hash });
 
   const { data: reviewerSBT } = useReadContract({
-    address: "0x7e41af17346bD0cd23998A71509DFD20938f50A1",
+    address: process.env.NEXT_PUBLIC_REVIEWER_SBT_ADDRESS as `0x${string}`,
     abi: reviewerSBTAbi.abi,
     functionName: "balanceOf",
     args: [address],
   });
 
   const { data: skillsList } = useReadContract({
-    address: "0x7e41af17346bD0cd23998A71509DFD20938f50A1",
+    address: process.env.NEXT_PUBLIC_REVIEWER_SBT_ADDRESS as `0x${string}`,
     abi: reviewerSBTAbi.abi,
     functionName: "getAllTagTypes",
     args: [],
@@ -96,7 +96,7 @@ export default function SkillsDialog({
       setLoading(true);
       try {
         writeContract({
-          address: "0x7e41af17346bD0cd23998A71509DFD20938f50A1",
+          address: process.env.NEXT_PUBLIC_REVIEWER_SBT_ADDRESS as `0x${string}`,
           abi: reviewerSBTAbi.abi,
           functionName: "mint",
           args: [address, Array.from(selectedSkills)],
