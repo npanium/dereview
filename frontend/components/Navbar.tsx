@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
 import { FundButton, getOnrampBuyUrl } from "@coinbase/onchainkit/fund";
+import Image from "next/image";
 
 export default function Navbar() {
   const { authenticated, logout, user } = usePrivy();
@@ -11,10 +12,16 @@ export default function Navbar() {
   return (
     <nav className="bg-[#53386d] border-b border-gray-800">
       <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-        <Link href="/" className="text-xl font-bold hover:opacity-90">
-          DeReview
+        <Link href="/" className="flex items-center gap-2 hover:opacity-90">
+          <Image
+            src="/logo.jpeg"
+            alt="DeReview Logo"
+            width={32}
+            height={32}
+            className="w-8 h-auto"
+          />
+          <span className="text-xl font-bold">DeReview</span>
         </Link>
-
         {authenticated && (
           <div className="flex items-center gap-4">
             <Link href="/account">
