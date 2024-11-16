@@ -39,12 +39,14 @@ const AVAILABLE_SKILLS = [
 
 interface SkillsDialogProps {
   existingSkills?: string[];
+  hidden?: boolean;
   onSkillsUpdate: (skills: string[]) => void;
 }
 
 export default function SkillsDialog({
   existingSkills = [],
   onSkillsUpdate,
+  hidden = false,
 }: SkillsDialogProps) {
   const [selectedSkills, setSelectedSkills] = useState<Set<string>>(
     new Set(existingSkills)
@@ -159,7 +161,7 @@ export default function SkillsDialog({
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          className=" hidden border-[#432d5e] text-[#432d5e] hover:bg-[#432d5e] hover:text-white"
+          className={`${hidden ? "hidden" : "border-[#432d5e] text-[#432d5e] hover:bg-[#432d5e] hover:text-white"}`}
         >
           Update Skills
         </Button>
