@@ -8,7 +8,7 @@ import {ReviewPool} from "../src/reviewPool/ReviewPool.sol";
 
 contract Deploy is Script {
 
-    function setup() public {
+    function setUp() public {
 
     }
 
@@ -16,6 +16,11 @@ contract Deploy is Script {
         vm.startBroadcast();
 
         ReviewerSBT reviewerSBT = new ReviewerSBT();
+        reviewerSBT.addTagType("Physics");
+        reviewerSBT.addTagType("Math");
+        reviewerSBT.addTagType("Computer Science");
+        reviewerSBT.addTagType("Economics");
+        reviewerSBT.addTagType("Chemistry");
         ReviewPool reviewPool = new ReviewPool();
         ReviewPoolFactory reviewPoolFactory = new ReviewPoolFactory(address(reviewPool), address(reviewerSBT));
 

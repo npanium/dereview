@@ -24,7 +24,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useAccount } from "wagmi";
-import { useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi";
+import {
+  useWriteContract,
+  useWaitForTransactionReceipt,
+  useReadContract,
+} from "wagmi";
 import { parseEther } from "viem";
 import ReviewPoolFactory from "@/lib/abi/ReviewPoolFactory.json";
 import reviewerSBTAbi from "@/lib/abi/ReviewerSBT.json";
@@ -36,6 +40,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import FileUpload from "./FileUpload";
 
 const formSchema = z.object({
   title: z
@@ -54,9 +59,6 @@ const formSchema = z.object({
     .max(100, {
       message: "Topic cannot exceed 100 characters",
     }),
-  paperLink: z.string().url({
-    message: "Please enter a valid URL starting with http:// or https://",
-  }),
   bounty: z
     .number()
     .min(0.01, { message: "Minimum bounty is 0.01 ETH" })
@@ -72,10 +74,6 @@ const formSchema = z.object({
     .refine((val) => !isNaN(val), {
       message: "Please enter a valid number",
     }),
-  //   abstract: z
-  //     .string()
-  //     .min(50, { message: "Abstract must be at least 50 characters" })
-  //     .max(5000, { message: "Abstract cannot exceed 5000 characters" }),
 });
 
 type PaperSubmissionForm = z.infer<typeof formSchema>;
@@ -84,21 +82,21 @@ interface SubmitPaperFormProps {
 }
 
 export default function SubmitPaperForm({ onSuccess }: SubmitPaperFormProps) {
+  const [ipfsLink, setIpfsLink] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { address } = useAccount();
-  const { data:hash, isSuccess, writeContract } = useWriteContract();
+  const { data: hash, isSuccess, writeContract } = useWriteContract();
   const { data: receipt } = useWaitForTransactionReceipt();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
       topic: "",
-      paperLink: "",
       bounty: 0.01,
       reviewersCount: 3,
-      //   abstract: "",
     },
   });
 
@@ -111,7 +109,7 @@ export default function SubmitPaperForm({ onSuccess }: SubmitPaperFormProps) {
   const topic = form.watch("topic");
   console.log("topic", topic);
 
-  const {data: tagHash} = useReadContract({
+  const { data: tagHash } = useReadContract({
     address: process.env.NEXT_PUBLIC_REVIEWER_SBT_ADDRESS as `0x${string}`,
     abi: reviewerSBTAbi.abi,
     functionName: "tagTypesHash",
@@ -121,23 +119,33 @@ export default function SubmitPaperForm({ onSuccess }: SubmitPaperFormProps) {
   console.log("tagHash", tagHash);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!ipfsLink) {
+      toast({
+        title: "❌ Error",
+        variant: "destructive",
+        description: "Please upload your paper first",
+      });
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       console.log(values);
-      // Your submission logic here
       try {
         writeContract({
-          address: process.env.NEXT_PUBLIC_REVIEW_POOL_FACTORY_ADDRESS as `0x${string}`,
+          address: process.env
+            .NEXT_PUBLIC_REVIEW_POOL_FACTORY_ADDRESS as `0x${string}`,
           abi: ReviewPoolFactory.abi,
           functionName: "createReviewPool",
           args: [
             tagHash,
-            values.paperLink,
-             values.reviewersCount],
+            ipfsLink, // Use ipfsLink instead of values.paperLink
+            values.title,
+            values.reviewersCount,
+          ],
           value: parseEther(values.bounty.toString()),
         });
         setLoading(true);
-
       } catch (error) {
         console.error(error);
         toast({
@@ -148,7 +156,7 @@ export default function SubmitPaperForm({ onSuccess }: SubmitPaperFormProps) {
       }
     } catch (error) {
       console.error(error);
-    } 
+    }
   }
   useEffect(() => {
     if (hash !== undefined) {
@@ -205,7 +213,10 @@ export default function SubmitPaperForm({ onSuccess }: SubmitPaperFormProps) {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(() => onSubmit(form.getValues()))} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(() => onSubmit(form.getValues()))}
+            className="space-y-6"
+          >
             <FormField
               control={form.control}
               name="title"
@@ -231,16 +242,20 @@ export default function SubmitPaperForm({ onSuccess }: SubmitPaperFormProps) {
                 <FormItem>
                   <FormLabel>Research Topic</FormLabel>
                   <FormControl>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <SelectTrigger className="border-gray-700">
                         <SelectValue placeholder="Select a research topic" />
                       </SelectTrigger>
                       <SelectContent>
-                        {skillsList !== undefined && (skillsList as Array<string>).map((skill: string) => (
-                          <SelectItem key={skill} value={skill}>
-                            {skill}
-                          </SelectItem>
-                        ))}
+                        {skillsList !== undefined &&
+                          (skillsList as Array<string>).map((skill: string) => (
+                            <SelectItem key={skill} value={skill}>
+                              {skill}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                   </FormControl>
@@ -252,36 +267,7 @@ export default function SubmitPaperForm({ onSuccess }: SubmitPaperFormProps) {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="paperLink"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Paper Link</FormLabel>
-                  <FormControl>
-                    <div className="flex items-center space-x-2">
-                      <Input
-                        placeholder="https://..."
-                        {...field}
-                        className=" border-gray-700"
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        className="border-gray-700 hover:"
-                      >
-                        <Link2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </FormControl>
-                  <FormDescription>
-                    Link to your paper (IPFS, arXiv, or other permanent URL)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <FileUpload setPaperLink={setIpfsLink} />
 
             <div className="grid gap-6 md:grid-cols-2">
               <FormField
@@ -338,6 +324,7 @@ export default function SubmitPaperForm({ onSuccess }: SubmitPaperFormProps) {
                         />
                       </div>
                     </FormControl>
+
                     <FormDescription>
                       Choose between 1-10 reviewers
                     </FormDescription>
@@ -368,7 +355,7 @@ export default function SubmitPaperForm({ onSuccess }: SubmitPaperFormProps) {
             <Button
               type="submit"
               className="w-full bg-[#432d5e] hover:bg-[#523d6e]"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !ipfsLink}
             >
               {isSubmitting ? (
                 <>

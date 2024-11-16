@@ -5,7 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Upload, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-export default function FileUpload() {
+interface FileUploadProps {
+  setPaperLink: (link: string | null) => void;
+}
+
+export default function FileUpload({ setPaperLink }: FileUploadProps) {
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -17,14 +21,11 @@ export default function FileUpload() {
       .replace(/[:.]/g, "-")
       .replace("T", "_")
       .slice(0, -5);
-
     const extension = originalName.split(".").pop();
     return `${timestamp}.${extension}`;
   };
 
-  const handleFileUpload = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleFileUpload = async () => {
     if (!selectedFile) {
       toast({
         variant: "destructive",
@@ -33,9 +34,8 @@ export default function FileUpload() {
       });
       return;
     }
-
     setIsUploading(true);
-    setIpfsLink(null); // Reset previous IPFS link
+    setPaperLink(null);
 
     try {
       const newFileName = getTimestampedFileName(selectedFile.name);
@@ -59,11 +59,11 @@ export default function FileUpload() {
       }
 
       const result = await response.json();
-
-      // Extract IPFS CID and create IPFS link
       const rootCID = result.data.RootCID;
       const ipfsUrl = `https://ipfs.io/ipfs/${rootCID}`;
+
       setIpfsLink(ipfsUrl);
+      setPaperLink(ipfsUrl); // Pass the IPFS URL up to the parent
 
       console.log("File Name:", result.data.Name);
       console.log("IPFS CID:", rootCID);
@@ -95,36 +95,35 @@ export default function FileUpload() {
 
   return (
     <div className="space-y-4">
-      <form onSubmit={handleFileUpload} className="space-y-4">
-        <div className="flex items-center gap-4">
-          <Input
-            id="file-upload"
-            type="file"
-            onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-            className="text-black border-gray-700"
-            accept=".pdf"
-          />
-          <Button
-            type="submit"
-            disabled={!selectedFile || isUploading}
-            className="bg-[#432d5e] hover:bg-[#523d6e] min-w-[100px]"
-          >
-            {isUploading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <>
-                <Upload className="h-4 w-4 mr-2" />
-                Upload
-              </>
-            )}
-          </Button>
-        </div>
-        {selectedFile && (
-          <p className="text-sm text-gray-400">
-            Selected file: {selectedFile.name}
-          </p>
-        )}
-      </form>
+      <div className="flex items-center gap-4">
+        <Input
+          id="file-upload"
+          type="file"
+          onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+          className="text-black border-gray-700"
+          accept=".pdf"
+        />
+        <Button
+          type="button" // Changed to button type
+          onClick={handleFileUpload} // Use onClick instead of form submit
+          disabled={!selectedFile || isUploading}
+          className="bg-[#432d5e] hover:bg-[#523d6e] min-w-[100px]"
+        >
+          {isUploading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <>
+              <Upload className="h-4 w-4 mr-2" />
+              Upload
+            </>
+          )}
+        </Button>
+      </div>
+      {selectedFile && (
+        <p className="text-sm text-gray-400">
+          Selected file: {selectedFile.name}
+        </p>
+      )}
 
       {ipfsLink && (
         <div className="p-4 bg-gray-800 rounded-md">

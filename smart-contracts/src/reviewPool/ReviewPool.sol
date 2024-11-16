@@ -18,6 +18,7 @@ contract ReviewPool is Initializable {
 
     bytes32 public tagTypesHash;
     string public paperUri;
+    string public paperTitle;
 
     address[] public reviewersList;
     string[] private reviews;
@@ -37,6 +38,7 @@ contract ReviewPool is Initializable {
         uint256 _reviewers, 
         bytes32 _tagTypesHash, 
         string memory _paperUri,
+        string memory _paperTitle,
         address _SBTAddress) external payable initializer {
         if(msg.value == 0) revert ReviewPool__InvalidPayment();
         if(_reviewers == 0) revert ReviewPool__InvalidReviewers();

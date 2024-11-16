@@ -25,6 +25,7 @@ contract ReviewPoolFactory is Ownable {
     function createReviewPool(
         bytes32 _tagTypesHash, 
         string memory _paperUri, 
+        string memory _paperTitle,
         uint256 _requiredReviewerNumber
     ) external payable {
         address clone = reviewPoolImplementation.cloneDeterministic(bytes32(reviewPoolCount));
@@ -32,6 +33,7 @@ contract ReviewPoolFactory is Ownable {
             _requiredReviewerNumber,
             _tagTypesHash,
             _paperUri,
+            _paperTitle,
             REVIEWER_SBT_ADDRESS
         );
         reviewPoolToAddress[reviewPoolCount] = clone;
