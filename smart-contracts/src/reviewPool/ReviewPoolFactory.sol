@@ -28,7 +28,7 @@ contract ReviewPoolFactory is Ownable {
         uint256 _requiredReviewerNumber
     ) external payable {
         address clone = reviewPoolImplementation.cloneDeterministic(bytes32(reviewPoolCount));
-        ReviewPool(payable(clone)).initialize(
+        ReviewPool(payable(clone)).initialize{value: msg.value}(
             _requiredReviewerNumber,
             _tagTypesHash,
             _paperUri,
