@@ -3,3 +3,21 @@ deploy-local:
 
 deploy-base-sepolia:
 	source .env && forge script script/Deploy.s.sol:Deploy --fork-url $$BASE_SEPOLIA_RPC_URL --account $$PRIVATE_KEY_NAME --sender $$DEPLOYER_ACCOUNT --broadcast -vvvv --verify --verifier blockscout --verifier-url https://base-sepolia.blockscout.com/api? -vvvv 
+
+#deploy-bitkub:
+
+deploy-morph:
+
+deploy-hedera:
+
+deploy-zkscroll:
+
+deploy-polygon:
+
+deploy-flow:
+
+
+
+#deploy-eth-holesky:
+
+
