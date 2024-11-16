@@ -3,13 +3,28 @@ import { usePrivy, useFundWallet } from "@privy-io/react-auth";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
+import { FundButton, getOnrampBuyUrl } from "@coinbase/onchainkit/fund";
 
 export default function Navbar() {
   const { authenticated, logout, user } = usePrivy();
   const { fundWallet } = useFundWallet();
 
+  const projectId = process.env.NEXT_PUBLIC_CDP_PROJECT_ID;
+  //@ts-expect-error
+  const address = user?.linkedAccounts[0].address;
+
+  //@ts-expect-error
+  const onrampBuyUrl = getOnrampBuyUrl({
+    projectId,
+    addresses: { [address]: ["base"] },
+    assets: ["USDC"],
+    presetFiatAmount: 20,
+    fiatCurrency: "USD",
+  });
+
   const handleFundWallet = async () => {
     //@ts-expect-error
+
     await fundWallet(user?.linkedAccounts[0].address);
   };
   //@ts-expect-error
@@ -36,6 +51,7 @@ export default function Navbar() {
               Logout
             </Button>
             <Button onClick={handleFundWallet}>Fund wallet</Button>
+            <FundButton fundingUrl={onrampBuyUrl} />
           </div>
         )}
       </div>
