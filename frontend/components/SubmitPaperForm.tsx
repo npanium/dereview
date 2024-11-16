@@ -116,9 +116,10 @@ export default function SubmitPaperForm({ onSuccess }: SubmitPaperFormProps) {
     args: [topic],
   });
 
-  console.log("tagHash", tagHash);
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log("values", values);
+    console.log("ipfsLink", ipfsLink);
+    console.log("tagHash", tagHash);
     if (!ipfsLink) {
       toast({
         title: "❌ Error",
@@ -130,38 +131,42 @@ export default function SubmitPaperForm({ onSuccess }: SubmitPaperFormProps) {
 
     try {
       setIsSubmitting(true);
-      console.log(values);
-      try {
-        writeContract({
-          address: process.env
-            .NEXT_PUBLIC_REVIEW_POOL_FACTORY_ADDRESS as `0x${string}`,
-          abi: ReviewPoolFactory.abi,
-          functionName: "createReviewPool",
-          args: [
-            tagHash,
-            ipfsLink, // Use ipfsLink instead of values.paperLink
-            values.title,
-            values.reviewersCount,
-          ],
-          value: parseEther(values.bounty.toString()),
-        });
-        setLoading(true);
-      } catch (error) {
-        console.error(error);
+      if (!tagHash) {
         toast({
           title: "❌ Error",
           variant: "destructive",
-          description: "Failed to submit paper",
+          description: "Invalid topic selected",
         });
+        return;
       }
+
+      writeContract({
+        address: process.env.NEXT_PUBLIC_REVIEW_POOL_FACTORY_ADDRESS as `0x${string}`,
+        abi: ReviewPoolFactory.abi,
+        functionName: "createReviewPool",
+        args: [
+          tagHash,
+          ipfsLink,
+          values.title,
+          BigInt(values.reviewersCount),
+        ],
+        value: parseEther(values.bounty.toString()),
+      });
     } catch (error) {
       console.error(error);
+      toast({
+        title: "❌ Error",
+        variant: "destructive",
+        description: "Failed to submit paper",
+      });
+      setIsSubmitting(false);
     }
   }
+
   useEffect(() => {
     if (hash !== undefined) {
       toast({
-        title: "Minting skills credentials",
+        title: "Creating Peer Review Pool",
         description: (
           <span>
             Check tx on{" "}
@@ -182,7 +187,7 @@ export default function SubmitPaperForm({ onSuccess }: SubmitPaperFormProps) {
   useEffect(() => {
     if (isSuccess) {
       toast({
-        title: "✅ Skills Credential Minted",
+        title: "✅ Peer Review Pool Created",
         description: (
           <span>
             See your credential on{" "}
@@ -213,10 +218,7 @@ export default function SubmitPaperForm({ onSuccess }: SubmitPaperFormProps) {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(() => onSubmit(form.getValues()))}
-            className="space-y-6"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="title"
