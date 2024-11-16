@@ -17,6 +17,7 @@ import {
   useReadContract,
   useWriteContract,
   useWaitForTransactionReceipt,
+  useAccount,
 } from "wagmi";
 import { getBalance } from "viem/actions";
 import { baseSepolia } from "viem/chains";
@@ -45,10 +46,13 @@ export default function ReviewerCard({ address }: ReviewerCardProps) {
     data,
   } = useWaitForTransactionReceipt({ hash });
   const { toast } = useToast();
+  const { address: userAddress } = useAccount();
   const client = createPublicClient({
     chain: baseSepolia,
     transport: http(),
   });
+
+  console.log("address", address);
 
   useEffect(() => {
     const fetchBalance = async () => {
@@ -110,10 +114,19 @@ export default function ReviewerCard({ address }: ReviewerCardProps) {
   });
 
   console.log("contractReads", contractReads);
+  console.log("tagTypeHash", tagTypesHash);
   console.log("balance", balance);
   console.log("tagTypes", tagTypes);
 
+  const { data: tagsByUser } = useReadContract({
+    address: process.env.NEXT_PUBLIC_REVIEWER_SBT_ADDRESS as `0x${string}`,
+    abi: ReviewerSBT.abi,
+    functionName: "getTagsByUser",
+    args: [userAddress as `0x${string}`],
+  });
+  console.log("tagsByUser", tagsByUser);
   const expertise = ["Blockchain", "Smart Contracts"]; // Placeholder expertise tags
+
   const addReviewer = async () => {
     console.log("applyForReview");
     setIsApplying(true);
@@ -122,7 +135,7 @@ export default function ReviewerCard({ address }: ReviewerCardProps) {
         address: address as `0x${string}`,
         abi: ReviewPool.abi,
         functionName: "addReviewer",
-        args: ["0"],
+        args: [0],
       });
     } catch (error) {
       console.error("Error applying for review:", error);
