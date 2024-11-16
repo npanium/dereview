@@ -34,10 +34,10 @@ export default function RoleSelector() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-6 w-6" />
-                Researcher
+                Request Review
               </CardTitle>
               <CardDescription>
-                Submit and track your research papers
+                Submit and ask for reviews on your research papers
               </CardDescription>
             </CardHeader>
           </Card>
@@ -49,10 +49,10 @@ export default function RoleSelector() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <UserCircle className="h-6 w-6" />
-                Reviewer
+                Dashboard
               </CardTitle>
               <CardDescription>
-                Review papers in your area of expertise
+                Look for available papers for review in your area of expertise
               </CardDescription>
             </CardHeader>
           </Card>

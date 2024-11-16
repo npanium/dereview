@@ -1,4 +1,6 @@
+import AddPaperDialog from "@/components/AddPaperDialog";
 import PaperCard from "@/components/dashboard/paper-card";
+import { Button } from "@/components/ui/button";
 import { mockPapers } from "@/lib/mock-data";
 
 export default function ResearcherDashboard() {
@@ -10,6 +12,8 @@ export default function ResearcherDashboard() {
           <PaperCard key={paper.id} {...paper} />
         ))}
       </div>
+      {/* <Button className="bg-[#432d5e]"> Add paper </Button> */}
+      <AddPaperDialog />
     </div>
   );
 }
