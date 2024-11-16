@@ -5,15 +5,10 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, Wallet } from "lucide-react";
-import {
-  Avatar,
-  Identity,
-  Name,
-  Badge,
-  Address,
-} from "@coinbase/onchainkit/identity";
+import { Avatar, Identity, Name, Badge } from "@coinbase/onchainkit/identity";
 import { getConfig } from "@/lib/wagmi";
 import { FundButton, getOnrampBuyUrl } from "@coinbase/onchainkit/fund";
+import { Address } from "viem";
 
 export default function AccountPage() {
   const {
@@ -78,7 +73,7 @@ export default function AccountPage() {
           </div>
 
           <Identity
-            address={wallet?.address}
+            address={wallet?.address as Address}
             schemaId="0xf8b05c79f090979bf4a80270aba232dff11a10d9ca55c4f88de95317970f0de9"
           >
             {/* <Avatar /> */}
