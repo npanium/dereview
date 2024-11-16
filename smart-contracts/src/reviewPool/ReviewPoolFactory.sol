@@ -9,7 +9,7 @@ contract ReviewPoolFactory is Ownable {
     using Clones for address;
 
     address public immutable reviewPoolImplementation;
-
+    address public immutable REVIEWER_SBT_ADDRESS;
     mapping(uint256 => address) public reviewPoolToAddress;
     mapping(address => uint256[]) public addressToReviewPools;
 
@@ -17,8 +17,9 @@ contract ReviewPoolFactory is Ownable {
 
     event ReviewPoolCreated(uint256 indexed reviewPoolId, address indexed reviewPoolAddress);
 
-    constructor(address _reviewPoolImplementation) Ownable(msg.sender) {
+    constructor(address _reviewPoolImplementation, address _reviewerSBTAddress) Ownable(msg.sender) {
         reviewPoolImplementation = _reviewPoolImplementation;
+        REVIEWER_SBT_ADDRESS = _reviewerSBTAddress;
     }
 
     function createReviewPool(
@@ -27,10 +28,11 @@ contract ReviewPoolFactory is Ownable {
         uint256 _requiredReviewerNumber
     ) external payable {
         address clone = reviewPoolImplementation.cloneDeterministic(bytes32(reviewPoolCount));
-        ReviewPool(clone).initialize(
+        ReviewPool(payable(clone)).initialize(
             _requiredReviewerNumber,
             _tagTypesHash,
-            _paperUri
+            _paperUri,
+            REVIEWER_SBT_ADDRESS
         );
         reviewPoolToAddress[reviewPoolCount] = clone;
         addressToReviewPools[msg.sender].push(reviewPoolCount);

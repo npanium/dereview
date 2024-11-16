@@ -14,8 +14,6 @@ error ReviewPool__Full();
 contract ReviewPool is Initializable {
 
     uint256 public requiredReviewerNumber;
-    uint256 public poolPrize;
-    uint256 public reviewerShare;
     uint256 private reviewProgress;
 
     bytes32 public tagTypesHash;
@@ -24,7 +22,7 @@ contract ReviewPool is Initializable {
     address[] public reviewersList;
     string[] private reviews;
     mapping(address => string) private reviewerToReview;
-    address constant REVIEWER_SBT_ADDRESS = 0x0000000000000000000000000000000000000000;
+    address private REVIEWER_SBT_ADDRESS;
     
     mapping(address => bool) public hasReviewed;
 
@@ -38,7 +36,8 @@ contract ReviewPool is Initializable {
     function initialize(
         uint256 _reviewers, 
         bytes32 _tagTypesHash, 
-        string memory _paperUri) external payable initializer {
+        string memory _paperUri,
+        address _SBTAddress) external payable initializer {
         if(msg.value == 0) revert ReviewPool__InvalidPayment();
         if(_reviewers == 0) revert ReviewPool__InvalidReviewers();
         if(bytes(_paperUri).length == 0) revert ReviewPool__EmptyPaperUri();
@@ -46,9 +45,8 @@ contract ReviewPool is Initializable {
         requiredReviewerNumber = _reviewers;
         tagTypesHash = _tagTypesHash;
         paperUri = _paperUri;
-        poolPrize = msg.value;
-        reviewerShare = poolPrize / requiredReviewerNumber;
         reviewProgress = 0;
+        REVIEWER_SBT_ADDRESS = _SBTAddress;
     }
 
     function addReviewer(uint256 _tokenId) public {
@@ -77,6 +75,7 @@ contract ReviewPool is Initializable {
         reviewProgress++;
         reviews.push(_review);
         reviewerToReview[msg.sender] = _review;
+        uint256 reviewerShare = address(this).balance / requiredReviewerNumber;
 
         (bool success, ) = msg.sender.call{value: reviewerShare}("");
         if(!success) revert ReviewPool__ReviewClaimFailed();
