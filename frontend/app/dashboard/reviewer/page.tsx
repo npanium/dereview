@@ -5,14 +5,15 @@ import { mockReviewers } from "@/lib/mock-data";
 import ReviewPoolFactory from "@/lib/abi/ReviewPoolFactory.json";
 
 import { useReadContract, useReadContracts } from "wagmi";
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import { Abi } from "viem";
 
 export default function ReviewerDashboard() {
   const [poolAddresses, setPoolAddresses] = useState<string[]>([]);
-  
+
   const { data: poolCount } = useReadContract({
-    address: process.env.NEXT_PUBLIC_REVIEW_POOL_FACTORY_ADDRESS as `0x${string}`,
+    address: process.env
+      .NEXT_PUBLIC_REVIEW_POOL_FACTORY_ADDRESS as `0x${string}`,
     abi: ReviewPoolFactory.abi,
     functionName: "reviewPoolCount",
     args: [],
@@ -22,12 +23,15 @@ export default function ReviewerDashboard() {
 
   // Use useContractReads with correct syntax
   const { data: poolReadResults } = useReadContracts({
-    contracts: Array.from({ length: Number(poolCount) || 0 }).map((_, index) => ({
-      address: process.env.NEXT_PUBLIC_REVIEW_POOL_FACTORY_ADDRESS as `0x${string}`,
-      abi: ReviewPoolFactory.abi as Abi,
-      functionName: "reviewPoolToAddress",
-      args: [BigInt(index)],
-    })),
+    contracts: Array.from({ length: Number(poolCount) || 0 }).map(
+      (_, index) => ({
+        address: process.env
+          .NEXT_PUBLIC_REVIEW_POOL_FACTORY_ADDRESS as `0x${string}`,
+        abi: ReviewPoolFactory.abi as Abi,
+        functionName: "reviewPoolToAddress",
+        args: [BigInt(index)],
+      })
+    ),
   });
 
   console.log("poolReadResults", poolReadResults);
@@ -36,7 +40,7 @@ export default function ReviewerDashboard() {
   useEffect(() => {
     if (poolReadResults) {
       const addresses = poolReadResults
-        .map(result => result.result as string)
+        .map((result) => result.result as string)
         .filter(Boolean);
       setPoolAddresses(addresses);
     }
@@ -54,6 +58,8 @@ export default function ReviewerDashboard() {
           <ReviewerCard key={key} address={address} />
         ))}
       </div>
+      <div className="border-gray-500 border-t w-full my-10"></div>
+      <h2 className="text-2xl font-bold mb-6 text-[#432d5e]">Submit Review</h2>
     </div>
   );
 }
