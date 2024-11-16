@@ -12,11 +12,14 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useReadContract, useWriteContract, useAccount, 
-  useWaitForTransactionReceipt } from "wagmi";
+import {
+  useReadContract,
+  useWriteContract,
+  useAccount,
+  useWaitForTransactionReceipt,
+} from "wagmi";
 import reviewerSBTAbi from "@/lib/abi/ReviewerSBT.json";
-import { useToast } from "@/hooks/use-toast"
-
+import { useToast } from "@/hooks/use-toast";
 
 // Mock skills data - replace with your actual skills data
 const AVAILABLE_SKILLS = [
@@ -55,8 +58,12 @@ export default function SkillsDialog({
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
   const { address } = useAccount();
-  const { data: hash,  writeContract } = useWriteContract();
-  const { data: receipt, isLoading, isSuccess } = useWaitForTransactionReceipt({ hash });
+  const { data: hash, writeContract } = useWriteContract();
+  const {
+    data: receipt,
+    isLoading,
+    isSuccess,
+  } = useWaitForTransactionReceipt({ hash });
 
   const { data: reviewerSBT } = useReadContract({
     address: "0x7e41af17346bD0cd23998A71509DFD20938f50A1",
@@ -85,7 +92,7 @@ export default function SkillsDialog({
   };
 
   const handleSave = async () => {
-    if(reviewerSBT !== 0) {
+    if (reviewerSBT !== 0) {
       setLoading(true);
       try {
         writeContract({
@@ -113,34 +120,12 @@ export default function SkillsDialog({
 
   useEffect(() => {
     if (hash !== undefined) {
-    toast({ 
-      title: "Minting skills credentials",
-      description: (
-        <span>
-          Check tx on  {' '}
-          <a 
-          href={`https://base-sepolia.blockscout.com/tx/${hash}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline text-blue-500 hover:text-blue-600"
-          >
-            Blockscout
-          </a>
-        </span>
-      )
-    });
-   
-    }
-  }, [hash]);
-
-  useEffect(() => {
-    if (isSuccess) {
-      toast({ 
-        title: "✅ Skills Credential Minted",
+      toast({
+        title: "Minting skills credentials",
         description: (
           <span>
-            See your credential on {' '}
-            <a 
+            Check tx on{" "}
+            <a
               href={`https://base-sepolia.blockscout.com/tx/${hash}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -149,7 +134,28 @@ export default function SkillsDialog({
               Blockscout
             </a>
           </span>
-        )
+        ),
+      });
+    }
+  }, [hash]);
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast({
+        title: "✅ Skills Credential Minted",
+        description: (
+          <span>
+            See your credential on{" "}
+            <a
+              href={`https://base-sepolia.blockscout.com/tx/${hash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-blue-500 hover:text-blue-600"
+            >
+              Blockscout
+            </a>
+          </span>
+        ),
       });
       setLoading(false);
     }
@@ -163,12 +169,12 @@ export default function SkillsDialog({
           variant="outline"
           className={`${hidden ? "hidden" : "border-[#432d5e] text-[#432d5e] hover:bg-[#432d5e] hover:text-white"}`}
         >
-          Update Skills
+          Add Skills
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-[#432d5e]">Update Skills</DialogTitle>
+          <DialogTitle className="text-[#432d5e]">Add Skills</DialogTitle>
           <DialogDescription className="">
             Select your areas of expertise. Click a skill to select or deselect
             it.
@@ -202,20 +208,22 @@ export default function SkillsDialog({
           </h4>
           <ScrollArea className="h-[200px] rounded-md border border-gray-800 p-4">
             <div className="flex flex-wrap gap-2">
-              {skillsList !== undefined ? (skillsList as Array<string>).map((skill: string) => (
-                <Badge
-                  key={skill}
-                  variant="outline"
-                  className={`cursor-pointer transition-colors ${
-                    selectedSkills.has(skill)
-                      ? "bg-[#432d5e] text-white border-[#432d5e]"
-                      : "border-gray-600 text-gray-800 hover:bg-[#432d5e] hover:text-white "
-                  }`}
-                  onClick={() => toggleSkill(skill)}
-                >
-                  {skill}
-                </Badge>
-              )) : (
+              {skillsList !== undefined ? (
+                (skillsList as Array<string>).map((skill: string) => (
+                  <Badge
+                    key={skill}
+                    variant="outline"
+                    className={`cursor-pointer transition-colors ${
+                      selectedSkills.has(skill)
+                        ? "bg-[#432d5e] text-white border-[#432d5e]"
+                        : "border-gray-600 text-gray-800 hover:bg-[#432d5e] hover:text-white "
+                    }`}
+                    onClick={() => toggleSkill(skill)}
+                  >
+                    {skill}
+                  </Badge>
+                ))
+              ) : (
                 <span className="text-sm text-gray-500">No skills found</span>
               )}
             </div>

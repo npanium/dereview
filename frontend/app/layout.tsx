@@ -2,7 +2,8 @@ import Providers from "@/components/Providers";
 import "./globals.css";
 import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from "@/components/ui/toaster";
+import PoweredBy from "@/components/PoweredBy";
 
 export const metadata: Metadata = {
   title: "DeReview - Decentralized Paper Reviews",
@@ -20,6 +21,7 @@ export default function RootLayout({
         <Providers>
           <Navbar />
           <main className="min-h-screen">{children}</main>
+          <PoweredBy />
           <Toaster />
         </Providers>
       </body>

@@ -9,7 +9,7 @@ export default function Navbar() {
   const { authenticated, logout, user } = usePrivy();
 
   return (
-    <nav className="bg-[#432d5e] border-b border-gray-800">
+    <nav className="bg-[#53386d] border-b border-gray-800">
       <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
         <Link href="/" className="text-xl font-bold hover:opacity-90">
           DeReview
