@@ -8,9 +8,12 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { FileText, UserCircle } from "lucide-react";
+import { useState } from "react";
+import SkillsDialog from "@/components/SkillsDialogue";
 
 export default function RoleSelector() {
   const router = useRouter();
+  const [userSkills, setUserSkills] = useState<string[]>([]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] bg-gray-900">
@@ -18,6 +21,11 @@ export default function RoleSelector() {
         <h1 className="text-3xl font-bold text-center mb-8 text-[#432d5e]">
           DeReview
         </h1>
+
+        <SkillsDialog
+          existingSkills={userSkills}
+          onSkillsUpdate={setUserSkills}
+        />
         <div className="grid md:grid-cols-2 gap-6">
           <Card
             className="cursor-pointer hover:border-[#432d5e] transition-all"
