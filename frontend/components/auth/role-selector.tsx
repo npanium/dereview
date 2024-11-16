@@ -25,6 +25,7 @@ export default function RoleSelector() {
         <SkillsDialog
           existingSkills={userSkills}
           onSkillsUpdate={setUserSkills}
+          hidden={true}
         />
         <div className="grid md:grid-cols-2 gap-6">
           <Card

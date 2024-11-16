@@ -4,11 +4,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mail, Phone, Wallet } from "lucide-react";
+import { Mail, Phone, Wallet, BookMarked } from "lucide-react";
 import { Avatar, Identity, Name, Badge } from "@coinbase/onchainkit/identity";
 import { getConfig } from "@/lib/wagmi";
 import { FundButton, getOnrampBuyUrl } from "@coinbase/onchainkit/fund";
 import { Address } from "viem";
+import SkillsDialogue from "@/components/SkillsDialogue";
 
 export default function AccountPage() {
   const {
@@ -24,6 +25,7 @@ export default function AccountPage() {
     unlinkWallet,
   } = usePrivy();
   const router = useRouter();
+  const [userSkills, setUserSkills] = useState<string[]>([]);
 
   const projectId = process.env.NEXT_PUBLIC_CDP_PROJECT_ID;
   //@ts-expect-error
@@ -183,6 +185,24 @@ export default function AccountPage() {
                 Connect
               </Button>
             )}
+          </div>
+
+            {/* Skills Section */}
+          <div className="flex items-center justify-between p-4 rounded-lg bg-gray-800/30 border border-gray-700">
+          <div className="flex items-center gap-3">
+              <BookMarked className="w-5 h-5 text-[#432d5e]" />
+              <div>
+                <div className="font-medium">Skills</div>
+                <div className="text-sm text-gray-400">
+                  {"Add new skills"}
+                </div>
+              </div>
+            </div>
+            <SkillsDialogue
+              existingSkills={userSkills}
+              onSkillsUpdate={setUserSkills}
+              hidden={false}
+            />
           </div>
 
           <div className="mt-6 text-sm text-gray-400">
