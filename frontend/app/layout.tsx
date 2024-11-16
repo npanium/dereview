@@ -4,6 +4,9 @@ import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/toaster";
 import PoweredBy from "@/components/PoweredBy";
+import { Raleway } from "next/font/google";
+
+const raleway = Raleway({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "DeReview - Decentralized Paper Reviews",
@@ -17,10 +20,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="">
-      <body className={` font-sans bg-gray-200 text-gray-100`}>
+      <body
+        className={`${raleway.className}  font-sans bg-gray-200 text-gray-100`}
+      >
         <Providers>
           <Navbar />
-          <main className="min-h-screen">{children}</main>
+          <main className="">{children}</main>
           <PoweredBy />
           <Toaster />
         </Providers>

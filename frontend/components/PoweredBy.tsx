@@ -3,7 +3,8 @@ import Image from "next/image";
 // Add or remove logos as needed
 const LOGOS = [
   { src: "/poweredby/Blockscout.png", alt: "Blockscout" },
-  //   { src: "/poweredby/Coinbase.png", alt: "Coinbase" },
+  { src: "/poweredby/Coinbase.png", alt: "Coinbase" },
+  { src: "/poweredby/Filecoin.png", alt: "Filecoin" },
   //   { src: "/poweredby/Flow.png", alt: "Flow" },
   //   { src: "/poweredby/Hedera.png", alt: "Hedera" },
   //   { src: "/poweredby/Linea.png", alt: "Linea" },

@@ -17,7 +17,7 @@ export default function RoleSelector() {
   const [userSkills, setUserSkills] = useState<string[]>([]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] ">
+    <div className="flex flex-col items-center justify-center my-32 ">
       <div className="w-full max-w-4xl p-6">
         <h1 className="text-3xl font-bold text-center mb-8 text-[#432d5e]">
           DeReview
