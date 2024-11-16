@@ -7,28 +7,7 @@ import { FundButton, getOnrampBuyUrl } from "@coinbase/onchainkit/fund";
 
 export default function Navbar() {
   const { authenticated, logout, user } = usePrivy();
-  const { fundWallet } = useFundWallet();
 
-  const projectId = process.env.NEXT_PUBLIC_CDP_PROJECT_ID;
-  //@ts-expect-error
-  const address = user?.linkedAccounts[0].address;
-
-  //@ts-expect-error
-  const onrampBuyUrl = getOnrampBuyUrl({
-    projectId,
-    addresses: { [address]: ["base"] },
-    assets: ["USDC"],
-    presetFiatAmount: 20,
-    fiatCurrency: "USD",
-  });
-
-  const handleFundWallet = async () => {
-    //@ts-expect-error
-
-    await fundWallet(user?.linkedAccounts[0].address);
-  };
-  //@ts-expect-error
-  console.log(JSON.stringify(user?.linkedAccounts[0].address));
   return (
     <nav className="bg-[#432d5e] border-b border-gray-800">
       <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
@@ -50,8 +29,7 @@ export default function Navbar() {
             >
               Logout
             </Button>
-            <Button onClick={handleFundWallet}>Fund wallet</Button>
-            <FundButton fundingUrl={onrampBuyUrl} />
+            {/* <Button onClick={handleFundWallet}>Fund wallet</Button> */}
           </div>
         )}
       </div>

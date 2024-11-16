@@ -1,10 +1,19 @@
 "use client";
-import { usePrivy } from "@privy-io/react-auth";
+import { useFundWallet, usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, Wallet } from "lucide-react";
+import {
+  Avatar,
+  Identity,
+  Name,
+  Badge,
+  Address,
+} from "@coinbase/onchainkit/identity";
+import { getConfig } from "@/lib/wagmi";
+import { FundButton, getOnrampBuyUrl } from "@coinbase/onchainkit/fund";
 
 export default function AccountPage() {
   const {
@@ -21,6 +30,18 @@ export default function AccountPage() {
   } = usePrivy();
   const router = useRouter();
 
+  const projectId = process.env.NEXT_PUBLIC_CDP_PROJECT_ID;
+  //@ts-expect-error
+  const address = user?.linkedAccounts.address;
+  //@ts-expect-error
+  const onrampBuyUrl = getOnrampBuyUrl({
+    projectId,
+    addresses: { [address]: ["base"] },
+    assets: ["USDC"],
+    presetFiatAmount: 20,
+    fiatCurrency: "USD",
+  });
+  const [config] = useState(() => getConfig());
   useEffect(() => {
     if (ready && !authenticated) {
       router.push("/");
@@ -36,6 +57,9 @@ export default function AccountPage() {
   const phone = user?.phone;
   const wallet = user?.wallet;
 
+  const { fundWallet } = useFundWallet();
+
+  console.log("wallet:", JSON.stringify(wallet));
   return (
     <div className="max-w-4xl mx-auto p-6">
       <Card className="bg-gray-800/50 border-gray-700">
@@ -53,6 +77,16 @@ export default function AccountPage() {
             </Button>
           </div>
 
+          <Identity
+            address={wallet?.address}
+            schemaId="0xf8b05c79f090979bf4a80270aba232dff11a10d9ca55c4f88de95317970f0de9"
+          >
+            {/* <Avatar /> */}
+            <Name>
+              <Badge />
+            </Name>
+            {/* <Address /> */}
+          </Identity>
           <div className="text-sm text-gray-400">
             Connected as{" "}
             {user?.email?.address || user?.wallet?.address || "Anonymous"}
@@ -97,13 +131,13 @@ export default function AccountPage() {
               <div>
                 <div className="font-medium">Wallet</div>
                 <div className="text-sm text-gray-400">
-                  {wallet ? (
+                  {/* {wallet ? (
                     <span className="font-mono">
                       {wallet.address.slice(0, 6)}...{wallet.address.slice(-4)}
                     </span>
                   ) : (
                     "Not connected"
-                  )}
+                  )} */}
                 </div>
               </div>
             </div>
@@ -163,6 +197,7 @@ export default function AccountPage() {
           </div>
         </CardContent>
       </Card>
+      <FundButton fundingUrl={onrampBuyUrl} />
     </div>
   );
 }
