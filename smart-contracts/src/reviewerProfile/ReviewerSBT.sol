@@ -86,8 +86,8 @@ contract ReviewerSBT is ERC721, IERC5484, Ownable {
         return tagTypes;
     }
 
-    function getTagTypeHash(string memory tagType) public view returns (bytes32) {
-        return tagTypesHash[tagType];
+    function getTagTypeHash(uint256 _tokenId) public view returns (bytes32) {
+        return tokenIdToTagTypeHash[_tokenId];
     }
 
     function _addTagType(string memory tagType) internal {
