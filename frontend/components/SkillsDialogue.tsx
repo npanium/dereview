@@ -70,6 +70,8 @@ export default function SkillsDialog({
     args: [],
   });
 
+  console.log(reviewerSBT);
+
   const toggleSkill = (skill: string) => {
     const newSkills = new Set<string>();
     if (selectedSkills.has(skill)) {
@@ -102,7 +104,7 @@ export default function SkillsDialog({
   };
 
   useEffect(() => {
-    if (reviewerSBT !== undefined && reviewerSBT === 0) {
+    if (reviewerSBT !== undefined && Number(reviewerSBT) === 0) {
       setIsOpen(true);
     }
   }, [reviewerSBT]);
