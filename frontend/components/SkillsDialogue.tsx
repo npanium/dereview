@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +12,11 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useReadContract, useWriteContract, useAccount, 
+  useWaitForTransactionReceipt } from "wagmi";
+import reviewerSBTAbi from "@/lib/abi/ReviewerSBT.json";
+import { useToast } from "@/hooks/use-toast"
+
 
 // Mock skills data - replace with your actual skills data
 const AVAILABLE_SKILLS = [
@@ -44,29 +49,115 @@ export default function SkillsDialog({
   const [selectedSkills, setSelectedSkills] = useState<Set<string>>(
     new Set(existingSkills)
   );
+  const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const { toast } = useToast();
+  const { address } = useAccount();
+  const { data: hash,  writeContract } = useWriteContract();
+  const { data: receipt, isLoading, isSuccess } = useWaitForTransactionReceipt({ hash });
+
+  const { data: reviewerSBT } = useReadContract({
+    address: "0x7e41af17346bD0cd23998A71509DFD20938f50A1",
+    abi: reviewerSBTAbi.abi,
+    functionName: "balanceOf",
+    args: [address],
+  });
+
+  const { data: skillsList } = useReadContract({
+    address: "0x7e41af17346bD0cd23998A71509DFD20938f50A1",
+    abi: reviewerSBTAbi.abi,
+    functionName: "getAllTagTypes",
+    args: [],
+  });
 
   const toggleSkill = (skill: string) => {
-    const newSkills = new Set(selectedSkills);
-    if (newSkills.has(skill)) {
-      newSkills.delete(skill);
+    const newSkills = new Set<string>();
+    if (selectedSkills.has(skill)) {
+      newSkills.clear();
     } else {
       newSkills.add(skill);
     }
     setSelectedSkills(newSkills);
   };
 
-  const handleSave = () => {
-    onSkillsUpdate(Array.from(selectedSkills));
-    setIsOpen(false);
+  const handleSave = async () => {
+    if(reviewerSBT !== 0) {
+      setLoading(true);
+      try {
+        writeContract({
+          address: "0x7e41af17346bD0cd23998A71509DFD20938f50A1",
+          abi: reviewerSBTAbi.abi,
+          functionName: "mint",
+          args: [address, Array.from(selectedSkills)],
+        });
+      } catch (error) {
+        console.error(error);
+        toast({
+          title: "❌ Error minting skills credential",
+          description: "Please try again later",
+        });
+        setLoading(false);
+      }
+    }
   };
+
+  useEffect(() => {
+    if (reviewerSBT !== undefined && reviewerSBT === 0) {
+      setIsOpen(true);
+    }
+  }, [reviewerSBT]);
+
+  useEffect(() => {
+    if (hash !== undefined) {
+    toast({ 
+      title: "Minting skills credentials",
+      description: (
+        <span>
+          Check tx on  {' '}
+          <a 
+          href={`https://base-sepolia.blockscout.com/tx/${hash}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline text-blue-500 hover:text-blue-600"
+          >
+            Blockscout
+          </a>
+        </span>
+      )
+    });
+   
+    }
+  }, [hash]);
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast({ 
+        title: "✅ Skills Credential Minted",
+        description: (
+          <span>
+            See your credential on {' '}
+            <a 
+              href={`https://base-sepolia.blockscout.com/tx/${hash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-blue-500 hover:text-blue-600"
+            >
+              Blockscout
+            </a>
+          </span>
+        )
+      });
+      setLoading(false);
+    }
+    setIsOpen(false);
+  }, [receipt]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          className="border-[#432d5e] text-[#432d5e] hover:bg-[#432d5e] hover:text-white"
+          className=" hidden border-[#432d5e] text-[#432d5e] hover:bg-[#432d5e] hover:text-white"
         >
           Update Skills
         </Button>
@@ -107,7 +198,7 @@ export default function SkillsDialog({
           </h4>
           <ScrollArea className="h-[200px] rounded-md border border-gray-800 p-4">
             <div className="flex flex-wrap gap-2">
-              {AVAILABLE_SKILLS.map((skill) => (
+              {skillsList !== undefined ? (skillsList as Array<string>).map((skill: string) => (
                 <Badge
                   key={skill}
                   variant="outline"
@@ -120,7 +211,9 @@ export default function SkillsDialog({
                 >
                   {skill}
                 </Badge>
-              ))}
+              )) : (
+                <span className="text-sm text-gray-500">No skills found</span>
+              )}
             </div>
           </ScrollArea>
         </div>
@@ -129,9 +222,17 @@ export default function SkillsDialog({
           <Button
             type="submit"
             className="bg-[#432d5e] hover:bg-[#523d6e] text-white"
-            onClick={handleSave}
+            onClick={() => handleSave()}
+            disabled={loading}
           >
-            Save Changes
+            {loading ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                Minting...
+              </div>
+            ) : (
+              "Mint Credential"
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>
