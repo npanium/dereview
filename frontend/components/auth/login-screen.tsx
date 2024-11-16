@@ -12,7 +12,7 @@ export default function LoginScreen() {
   const { login } = usePrivy();
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] bg-gray-900">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)]">
       <div className="w-full max-w-md p-6">
         <Card className="border-gray-800">
           <CardHeader className="text-center">

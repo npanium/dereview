@@ -71,17 +71,17 @@ export default function SkillsDialog({
           Update Skills
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-gray-900 text-gray-100">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Update Skills</DialogTitle>
-          <DialogDescription className="text-gray-400">
+          <DialogTitle className="text-[#432d5e]">Update Skills</DialogTitle>
+          <DialogDescription className="">
             Select your areas of expertise. Click a skill to select or deselect
             it.
           </DialogDescription>
         </DialogHeader>
 
         <div className="my-6">
-          <h4 className="mb-4 text-sm font-medium text-gray-400">
+          <h4 className="mb-4 text-sm font-medium text-[#432d5e]">
             Selected Skills
           </h4>
           <div className="flex flex-wrap gap-2 mb-6">
@@ -102,7 +102,7 @@ export default function SkillsDialog({
             )}
           </div>
 
-          <h4 className="mb-4 text-sm font-medium text-gray-400">
+          <h4 className="mb-4 text-sm font-medium text-[#432d5e]">
             Available Skills
           </h4>
           <ScrollArea className="h-[200px] rounded-md border border-gray-800 p-4">
@@ -114,7 +114,7 @@ export default function SkillsDialog({
                   className={`cursor-pointer transition-colors ${
                     selectedSkills.has(skill)
                       ? "bg-[#432d5e] text-white border-[#432d5e]"
-                      : "border-gray-600 text-gray-300 hover:border-[#432d5e] hover:text-white"
+                      : "border-gray-600 text-gray-800 hover:bg-[#432d5e] hover:text-white "
                   }`}
                   onClick={() => toggleSkill(skill)}
                 >
