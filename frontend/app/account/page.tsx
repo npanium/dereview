@@ -94,7 +94,15 @@ export default function AccountPage() {
         </CardHeader>
 
         <CardContent className="space-y-6">
+          <div className="flex flex-row items-center gap-2">
+            <p>Fund Wallet:</p>
+            <FundButton
+              fundingUrl={onrampBuyUrl}
+              className="bg-[#432d5e] rounded-lg text-white text-center"
+            />
+          </div>
           {/* Email Section */}
+
           <div className="flex items-center justify-between p-4 rounded-lg bg-gray-800/30 border border-gray-700">
             <div className="flex items-center gap-3">
               <Mail className="w-5 h-5 text-[#432d5e]" />
@@ -213,7 +221,6 @@ export default function AccountPage() {
           </div>
         </CardContent>
       </Card>
-      <FundButton fundingUrl={onrampBuyUrl} />
     </div>
   );
 }

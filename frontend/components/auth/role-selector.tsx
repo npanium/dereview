@@ -10,6 +10,7 @@ import {
 import { FileText, UserCircle } from "lucide-react";
 import { useState } from "react";
 import SkillsDialog from "@/components/SkillsDialogue";
+import AddPaperDialog from "../AddPaperDialog";
 
 export default function RoleSelector() {
   const router = useRouter();
@@ -28,7 +29,7 @@ export default function RoleSelector() {
           hidden={true}
         />
         <div className="grid md:grid-cols-2 gap-6">
-          <Card
+          {/* <Card
             className="cursor-pointer hover:border-[#432d5e] transition-all"
             onClick={() => router.push("/dashboard/researcher")}
           >
@@ -41,8 +42,8 @@ export default function RoleSelector() {
                 Submit and ask for reviews on your research papers
               </CardDescription>
             </CardHeader>
-          </Card>
-
+          </Card> */}
+          <AddPaperDialog />
           <Card
             className="cursor-pointer hover:border-[#432d5e] transition-all"
             onClick={() => router.push("/dashboard/reviewer")}
