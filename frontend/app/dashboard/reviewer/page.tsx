@@ -58,8 +58,6 @@ export default function ReviewerDashboard() {
           <ReviewerCard key={key} address={address} />
         ))}
       </div>
-      <div className="border-gray-500 border-t w-full my-10"></div>
-      <h2 className="text-2xl font-bold mb-6 text-[#432d5e]">Submit Review</h2>
     </div>
   );
 }

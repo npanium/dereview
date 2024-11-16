@@ -12,33 +12,42 @@ import { Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
-import { useReadContracts, 
-  useReadContract, useWriteContract,
-useWaitForTransactionReceipt } from "wagmi";
+import {
+  useReadContracts,
+  useReadContract,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+} from "wagmi";
 import { getBalance } from "viem/actions";
 import { baseSepolia } from "viem/chains";
 import ReviewPool from "@/lib/abi/ReviewPool.json";
-import { createPublicClient, http } from 'viem';
+import { createPublicClient, http } from "viem";
 import { useState, useEffect } from "react";
-import { formatEther } from 'viem';
+import { formatEther } from "viem";
 
 import ReviewerSBT from "@/lib/abi/ReviewerSBT.json";
+import Link from "next/link";
 
 interface ReviewerCardProps {
   address: string;
 }
 
-export default function ReviewerCard({
-  address,
-}: ReviewerCardProps) {
+export default function ReviewerCard({ address }: ReviewerCardProps) {
   const [balance, setBalance] = useState<bigint | null>(null);
   const [isApplying, setIsApplying] = useState(false);
-  const {data:hash, writeContract} = useWriteContract()
-  const {data:receipt, isLoading, isSuccess, isError, error, data} = useWaitForTransactionReceipt({hash})
+  const { data: hash, writeContract } = useWriteContract();
+  const {
+    data: receipt,
+    isLoading,
+    isSuccess,
+    isError,
+    error,
+    data,
+  } = useWaitForTransactionReceipt({ hash });
   const { toast } = useToast();
   const client = createPublicClient({
     chain: baseSepolia,
-    transport: http()
+    transport: http(),
   });
 
   useEffect(() => {
@@ -61,31 +70,37 @@ export default function ReviewerCard({
       {
         address: address as `0x${string}`,
         abi: ReviewPool.abi,
-        functionName: "paperTitle"
+        functionName: "paperTitle",
       },
       {
         address: address as `0x${string}`,
         abi: ReviewPool.abi,
-        functionName: "paperUri"
+        functionName: "paperUri",
       },
       {
         address: address as `0x${string}`,
         abi: ReviewPool.abi,
-        functionName: "tagTypesHash"
+        functionName: "tagTypesHash",
       },
       {
         address: address as `0x${string}`,
         abi: ReviewPool.abi,
-        functionName: "requiredReviewerNumber"
+        functionName: "requiredReviewerNumber",
       },
       {
         address: address as `0x${string}`,
         abi: ReviewPool.abi,
-        functionName: "author"
-      }
-    ]
+        functionName: "author",
+      },
+    ],
   });
-  const [name = "", uri = "", author = "", tagTypesHash = "", requiredReviewers = ""] = contractReads?.map(read => read.result as string) ?? [];
+  const [
+    name = "",
+    uri = "",
+    author = "",
+    tagTypesHash = "",
+    requiredReviewers = "",
+  ] = contractReads?.map((read) => read.result as string) ?? [];
 
   const { data: tagTypes } = useReadContract({
     address: process.env.NEXT_PUBLIC_REVIEWER_SBT_ADDRESS as `0x${string}`,
@@ -94,10 +109,9 @@ export default function ReviewerCard({
     args: [tagTypesHash],
   });
 
-  console.log("contractReads",contractReads);
+  console.log("contractReads", contractReads);
   console.log("balance", balance);
   console.log("tagTypes", tagTypes);
-
 
   const expertise = ["Blockchain", "Smart Contracts"]; // Placeholder expertise tags
   const addReviewer = async () => {
@@ -106,16 +120,16 @@ export default function ReviewerCard({
     try {
       writeContract({
         address: address as `0x${string}`,
-      abi: ReviewPool.abi,
-      functionName: "addReviewer",
-      args: ["0"]
+        abi: ReviewPool.abi,
+        functionName: "addReviewer",
+        args: ["0"],
       });
     } catch (error) {
       console.error("Error applying for review:", error);
     } finally {
       setIsApplying(false);
     }
-  }
+  };
 
   useEffect(() => {
     if (hash !== undefined) {
@@ -164,24 +178,48 @@ export default function ReviewerCard({
     <Card>
       <CardHeader>
         <CardTitle>{name}</CardTitle>
-        <CardDescription>{uri}</CardDescription>
-        <CardDescription>{author}</CardDescription>
-        <p className="text-sm text-gray-500">Bounty: {balance ? formatEther(balance) : '0'} ETH</p>
+        <CardDescription>
+          URL:{" "}
+          <Link href={uri} className="underline text-blue-500">
+            {uri}
+          </Link>
+        </CardDescription>
+        <CardDescription>Author: {author}</CardDescription>
+        <p className="text-sm text-gray-500">
+          Bounty: {balance ? formatEther(balance) : "0"} ETH
+        </p>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap gap-2">
-            {Array.isArray(tagTypes) && tagTypes.map((tag: string) => (
-              <Badge key={tag} variant="secondary">
-                <Tag className="h-3 w-3 mr-1" />
-                {tag}
-              </Badge>
-            ))}
+            {Array.isArray(tagTypes) &&
+              tagTypes.map((tag: string) => (
+                <Badge key={tag} variant="secondary">
+                  <Tag className="h-3 w-3 mr-1" />
+                  {tag}
+                </Badge>
+              ))}
           </div>
           <div className="flex justify-end">
-            <Button variant="outline" onClick={addReviewer} disabled={isApplying}>
-              {isApplying ? "Applying..." : "Apply for Review"}
-            </Button>
+            {isApplying ? (
+              <Button
+                variant="default"
+                onClick={addReviewer}
+                disabled={isApplying}
+                className="border-[#432d5e]"
+              >
+                Submit Review
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={addReviewer}
+                disabled={isApplying}
+                className="border-[#432d5e]"
+              >
+                Apply for Review
+              </Button>
+            )}
           </div>
         </div>
       </CardContent>
