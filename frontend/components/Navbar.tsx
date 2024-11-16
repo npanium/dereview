@@ -25,7 +25,7 @@ export default function Navbar() {
             <Button
               onClick={logout}
               variant="outline"
-              className="text-sm border-gray-200/20 hover:bg-[#523d6e] hover:text-white"
+              className="text-sm text-[#432d5e] border-gray-200/20 hover:bg-[#523d6e] hover:text-white"
             >
               Logout
             </Button>
