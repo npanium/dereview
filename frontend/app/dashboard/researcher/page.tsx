@@ -3,6 +3,7 @@ import PaperCard from "@/components/dashboard/paper-card";
 import { Button } from "@/components/ui/button";
 import { mockPapers } from "@/lib/mock-data";
 
+// Component No longer in use.
 export default function ResearcherDashboard() {
   return (
     <div className="p-6">

@@ -86,7 +86,8 @@ export default function SubmitPaperForm({ onSuccess }: SubmitPaperFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { address } = useAccount();
   const { data: hash, isSuccess, writeContract } = useWriteContract();
-  const { data: receipt, isSuccess: receiptSuccess } = useWaitForTransactionReceipt();
+  const { data: receipt, isSuccess: receiptSuccess } =
+    useWaitForTransactionReceipt();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -141,15 +142,11 @@ export default function SubmitPaperForm({ onSuccess }: SubmitPaperFormProps) {
       }
 
       writeContract({
-        address: process.env.NEXT_PUBLIC_REVIEW_POOL_FACTORY_ADDRESS as `0x${string}`,
+        address: process.env
+          .NEXT_PUBLIC_REVIEW_POOL_FACTORY_ADDRESS as `0x${string}`,
         abi: ReviewPoolFactory.abi,
         functionName: "createReviewPool",
-        args: [
-          tagHash,
-          ipfsLink,
-          values.title,
-          BigInt(values.reviewersCount),
-        ],
+        args: [tagHash, ipfsLink, values.title, BigInt(values.reviewersCount)],
         value: parseEther(values.bounty.toString()),
       });
     } catch (error) {

@@ -5,14 +5,14 @@ const LOGOS = [
   { src: "/poweredby/Blockscout.png", alt: "Blockscout" },
   { src: "/poweredby/Coinbase.png", alt: "Coinbase" },
   { src: "/poweredby/Filecoin.png", alt: "Filecoin" },
-  //   { src: "/poweredby/Flow.png", alt: "Flow" },
-  //   { src: "/poweredby/Hedera.png", alt: "Hedera" },
-  //   { src: "/poweredby/Linea.png", alt: "Linea" },
-  //   { src: "/poweredby/Morph.png", alt: "Morph" },
-  //   { src: "/poweredby/Polygon.png", alt: "Polygon" },
+  { src: "/poweredby/Flow.png", alt: "Flow" },
+  { src: "/poweredby/Hedera.png", alt: "Hedera" },
+  { src: "/poweredby/Linea.png", alt: "Linea" },
+  { src: "/poweredby/Morph.png", alt: "Morph" },
+  { src: "/poweredby/Polygon.png", alt: "Polygon" },
   { src: "/poweredby/Privy.png", alt: "Privy" },
-  //   { src: "/poweredby/Scroll.png", alt: "Scroll" },
-  //   { src: "/poweredby/Zircuit.png", alt: "Zircuit" },
+  { src: "/poweredby/Scroll.png", alt: "Scroll" },
+  { src: "/poweredby/Zircuit.png", alt: "Zircuit" },
 ] as const;
 
 export default function PoweredBy() {
