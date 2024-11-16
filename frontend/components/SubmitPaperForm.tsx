@@ -133,6 +133,7 @@ export default function SubmitPaperForm({ onSuccess }: SubmitPaperFormProps) {
           args: [
             tagHash,
             values.paperLink,
+            values.title,
              values.reviewersCount],
           value: parseEther(values.bounty.toString()),
         });
