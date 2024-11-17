@@ -184,7 +184,7 @@ export default function SubmitReviewForm({ onSuccess }: SubmitPaperFormProps) {
   useEffect(() => {
     if (receiptSuccess) {
       toast({
-        title: "✅ Peer Review Pool Created",
+        title: "✅ Review Created",
         description: (
           <span>
             See your credential on{" "}
@@ -206,17 +206,13 @@ export default function SubmitReviewForm({ onSuccess }: SubmitPaperFormProps) {
   return (
     <Card className="w-full max-w-3xl mx-auto border-gray-800 ">
       <CardHeader>
-        <CardTitle className="font-heading text-2xl">
-          Submit Paper for Review
-        </CardTitle>
-        <CardDescription>
-          Get your research paper reviewed by experts in your field
-        </CardDescription>
+        <CardTitle className="font-heading text-2xl">Submit Review</CardTitle>
+        <CardDescription>Submit your review to the paper</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
+            {/* <FormField
               control={form.control}
               name="title"
               render={({ field }) => (
@@ -232,9 +228,9 @@ export default function SubmitReviewForm({ onSuccess }: SubmitPaperFormProps) {
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
 
-            <FormField
+            {/* <FormField
               control={form.control}
               name="topic"
               render={({ field }) => (
@@ -264,11 +260,11 @@ export default function SubmitReviewForm({ onSuccess }: SubmitPaperFormProps) {
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
 
             <FileUpload setPaperLink={setIpfsLink} />
 
-            <div className="grid gap-6 md:grid-cols-2">
+            {/* <div className="grid gap-6 md:grid-cols-2">
               <FormField
                 control={form.control}
                 name="bounty"
@@ -331,7 +327,7 @@ export default function SubmitReviewForm({ onSuccess }: SubmitPaperFormProps) {
                   </FormItem>
                 )}
               />
-            </div>
+            </div> */}
 
             {/* <FormField
               control={form.control}

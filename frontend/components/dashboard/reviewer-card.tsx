@@ -1,4 +1,3 @@
-// components/dashboard/reviewer-card.tsx
 "use client";
 import {
   Card,
@@ -8,10 +7,9 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tag } from "lucide-react";
+import { Tag, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-
 import {
   useReadContracts,
   useReadContract,
@@ -25,26 +23,22 @@ import ReviewPool from "@/lib/abi/ReviewPool.json";
 import { createPublicClient, http } from "viem";
 import { useState, useEffect } from "react";
 import { formatEther } from "viem";
-
 import ReviewerSBT from "@/lib/abi/ReviewerSBT.json";
 import Link from "next/link";
+import AddReviewDialog from "../AddReviewDialog";
 
 interface ReviewerCardProps {
   address: string;
 }
 
 export default function ReviewerCard({ address }: ReviewerCardProps) {
-  const [balance, setBalance] = useState<bigint | null>(null);
   const [isApplying, setIsApplying] = useState(false);
   const { data: hash, writeContract } = useWriteContract();
-  const {
-    data: receipt,
-    isLoading,
-    isSuccess,
-    isError,
-    error,
-    data,
-  } = useWaitForTransactionReceipt({ hash });
+  const [balance, setBalance] = useState<bigint | null>(null);
+
+  const [hasApplied, setHasApplied] = useState(false);
+
+  const { data: receipt, isLoading } = useWaitForTransactionReceipt({ hash });
   const { toast } = useToast();
   const { address: userAddress } = useAccount();
   const client = createPublicClient({
@@ -52,8 +46,15 @@ export default function ReviewerCard({ address }: ReviewerCardProps) {
     transport: http(),
   });
 
-  console.log("address", address);
+  // Check if user is already a reviewer
+  const { data: isReviewer } = useReadContract({
+    address: address as `0x${string}`,
+    abi: ReviewPool.abi,
+    functionName: "reviewers",
+    args: [userAddress as `0x${string}`],
+  });
 
+  // Fetch balance and other data...
   useEffect(() => {
     const fetchBalance = async () => {
       try {
@@ -69,6 +70,7 @@ export default function ReviewerCard({ address }: ReviewerCardProps) {
     fetchBalance();
   }, [address, client]);
 
+  // Your existing contract reads...
   const { data: contractReads } = useReadContracts({
     contracts: [
       {
@@ -98,6 +100,7 @@ export default function ReviewerCard({ address }: ReviewerCardProps) {
       },
     ],
   });
+
   const [
     name = "",
     uri = "",
@@ -113,23 +116,7 @@ export default function ReviewerCard({ address }: ReviewerCardProps) {
     args: [tagTypesHash],
   });
 
-  console.log("contractReads", contractReads);
-  console.log("tagTypeHash", tagTypesHash);
-  console.log("balance", balance);
-  console.log("tagTypes", tagTypes);
-
-  const { data: tagsByUser } = useReadContract({
-    address: process.env.NEXT_PUBLIC_REVIEWER_SBT_ADDRESS as `0x${string}`,
-    abi: ReviewerSBT.abi,
-    functionName: "getTagsByUser",
-    args: [userAddress as `0x${string}`],
-  });
-  console.log("tagsByUser", tagsByUser);
-  const expertise = ["Blockchain", "Smart Contracts"]; // Placeholder expertise tags
-
   const addReviewer = async () => {
-    console.log("applyForReview");
-    setIsApplying(true);
     try {
       writeContract({
         address: address as `0x${string}`,
@@ -137,15 +124,20 @@ export default function ReviewerCard({ address }: ReviewerCardProps) {
         functionName: "addReviewer",
         args: [0],
       });
+      setIsApplying(true); // Set to true immediately after successful write
     } catch (error) {
       console.error("Error applying for review:", error);
-    } finally {
-      setIsApplying(false);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to apply for review. Please try again.",
+      });
     }
   };
 
+  // Handle transaction status updates
   useEffect(() => {
-    if (hash !== undefined) {
+    if (hash) {
       toast({
         title: "Applying for Review",
         description: (
@@ -167,6 +159,8 @@ export default function ReviewerCard({ address }: ReviewerCardProps) {
 
   useEffect(() => {
     if (receipt) {
+      setHasApplied(true);
+      setIsApplying(false);
       toast({
         title: "✅ Successfully Applied",
         description: (
@@ -183,9 +177,40 @@ export default function ReviewerCard({ address }: ReviewerCardProps) {
           </span>
         ),
       });
-      setIsApplying(false);
     }
   }, [receipt]);
+
+  // Determine button state
+  const getButtonContent = () => {
+    if (isReviewer || isApplying) {
+      return (
+        <div className="flex gap-2">
+          <Button variant="outline" disabled className="border-[#432d5e]">
+            Applied
+          </Button>
+          <AddReviewDialog />
+        </div>
+      );
+    }
+
+    if (userAddress?.toLowerCase() === author?.toLowerCase()) {
+      return (
+        <Button variant="default" disabled className="bg-gray-700">
+          Your Paper
+        </Button>
+      );
+    }
+
+    return (
+      <Button
+        variant="outline"
+        onClick={addReviewer}
+        className="border-[#432d5e]"
+      >
+        Apply for Review
+      </Button>
+    );
+  };
 
   return (
     <Card>
@@ -213,27 +238,7 @@ export default function ReviewerCard({ address }: ReviewerCardProps) {
                 </Badge>
               ))}
           </div>
-          <div className="flex justify-end">
-            {isApplying ? (
-              <Button
-                variant="default"
-                onClick={addReviewer}
-                disabled={isApplying}
-                className="border-[#432d5e]"
-              >
-                Submit Review
-              </Button>
-            ) : (
-              <Button
-                variant="outline"
-                onClick={addReviewer}
-                disabled={isApplying}
-                className="border-[#432d5e]"
-              >
-                Apply for Review
-              </Button>
-            )}
-          </div>
+          <div className="flex justify-end">{getButtonContent()}</div>
         </div>
       </CardContent>
     </Card>
