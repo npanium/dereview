@@ -7,16 +7,16 @@ deploy-base-sepolia:
 #deploy-bitkub:
 
 deploy-morph:
-	source .env && forge script script/Deploy.s.sol:Deploy --fork-url $$MORPH_RPC_URL --account $$PRIVATE_KEY_NAME --sender $$DEPLOYER_ACCOUNT --broadcast -vvvv --verify --verifier blockscout --verifier-url https://explorer-api.morphl2.io/api? -vvvv 
+	source .env && forge script script/Deploy.s.sol:Deploy --fork-url $$MORPH_RPC_URL --account $$PRIVATE_KEY_NAME --sender $$DEPLOYER_ACCOUNT --broadcast -vvvvv --verify --verifier blockscout --verifier-url https://explorer-api.morphl2.io/api? --chain 2810 --legacy -vvvv 
 
 deploy-hedera:
-	source .env && forge script script/Deploy.s.sol:Deploy --fork-url $$HEDERA_RPC_URL --account $$PRIVATE_KEY_NAME --sender $$DEPLOYER_ACCOUNT --broadcast -vvvv --verify --verifier sourcify --verifier-url https://server-verify.hashscan.io -vvvv 
+	source .env && forge script script/Deploy.s.sol:Deploy --fork-url $$HEDERA_RPC_URL --account $$PRIVATE_KEY_NAME --sender $$DEPLOYER_ACCOUNT --broadcast -vvvv --verify --verifier sourcify --verifier-url https://server-verify.hashscan.io --legacy -vvvv 
 
 deploy-zkscroll:
-	source .env && forge script script/Deploy.s.sol:Deploy --fork-url $$ZK_SCROLL_RPC_URL --account $$PRIVATE_KEY_NAME --sender $$DEPLOYER_ACCOUNT --broadcast -vvvv --verify --verifier-url --verifier-url https://api-sepolia.scrollscan.com/api --etherscan-api-key $$SCROLLSCAN_API -vvvv 
+	source .env && forge script script/Deploy.s.sol:Deploy --fork-url $$ZK_SCROLL_RPC_URL --account $$PRIVATE_KEY_NAME --sender $$DEPLOYER_ACCOUNT --broadcast -vvvv --verify  --verifier-url https://sepolia.scrollscan.com/api --etherscan-api-key $$SCROLLSCAN_API  -vvvv 
 
 deploy-polygon:
-	source .env && forge script script/Deploy.s.sol:Deploy --fork-url $$POLYGON_RPC_URL --account $$PRIVATE_KEY_NAME --sender $$DEPLOYER_ACCOUNT --broadcast -vvvv --verify --verifier-url https://api-amoy.polygonscan.com/api --etherscan-api-key $$POLYGONSCAN_API -vvvv 
+	source .env && forge script script/Deploy.s.sol:Deploy --fork-url $$POLYGON_RPC_URL --legacy --account $$PRIVATE_KEY_NAME --sender $$DEPLOYER_ACCOUNT --broadcast -vvvv --verify --verifier-url https://api-amoy.polygonscan.com/api --etherscan-api-key $$POLYGONSCAN_API -vvvv 
 
 deploy-flow:
 	source .env && forge script script/Deploy.s.sol:Deploy --fork-url $$FLOW_RPC_URL --account $$PRIVATE_KEY_NAME --sender $$DEPLOYER_ACCOUNT --legacy --broadcast -vvvv --verify --verifier blockscout --verifier-url https://evm-testnet.flowscan.io/api -vvvv 

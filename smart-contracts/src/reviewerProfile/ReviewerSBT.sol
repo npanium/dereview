@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.26;
+pragma solidity ^0.8.0;
 
-import {ERC721} from "@openzeppelin-contracts-5.0.2/token/ERC721/ERC721.sol";
-import {Ownable} from "@openzeppelin-contracts-5.0.2/access/Ownable.sol";
-import {IERC165} from "@openzeppelin-contracts-5.0.2/utils/introspection/ERC165.sol";
+import {ERC721} from "@openzeppelin-contracts-4.9.5/token/ERC721/ERC721.sol";
+import {Ownable} from "@openzeppelin-contracts-4.9.5/access/Ownable.sol";
+import {IERC165} from "@openzeppelin-contracts-4.9.5/utils/introspection/ERC165.sol";
 import {IERC5484} from "../interfaces/IERC5484.sol";
 
 error ReviewerSBT__NonTransferableToken();
@@ -36,7 +36,7 @@ contract ReviewerSBT is ERC721, IERC5484, Ownable {
         }
         _;
     }
-    constructor() ERC721("ReviewerSBT", "RSBT") Ownable(msg.sender) {
+    constructor() ERC721("ReviewerSBT", "RSBT") {
         burnAuthorization = BurnAuth.Both;
     }
 

@@ -1,11 +1,11 @@
 [profile.default]
 src = "src"
-solc_version = "0.8.26"
+solc_version = "0.8.11"
 out = "out"
 libs = ["dependencies"]
 
 [dependencies]
-forge-std = "1.9.4"
-"@openzeppelin-contracts" = "5.0.2"
+forge-std = "1.7.6"
+"@openzeppelin-contracts" = "4.9.5"
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

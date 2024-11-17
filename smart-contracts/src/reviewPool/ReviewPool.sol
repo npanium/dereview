@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.26;
+pragma solidity ^0.8.0;
 
 import {ReviewerSBT} from "../reviewerProfile/ReviewerSBT.sol";
-import {Initializable} from "@openzeppelin-contracts-5.0.2/proxy/utils/Initializable.sol";
+import {Initializable} from "@openzeppelin-contracts-4.9.5/proxy/utils/Initializable.sol";
 
 error ReviewPool__InvalidPayment();
 error ReviewPool__InvalidReviewers();

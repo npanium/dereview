@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.26;
+pragma solidity ^0.8.0;
 
 import {ReviewPool} from "./ReviewPool.sol";
-import {Clones} from "@openzeppelin-contracts-5.0.2/proxy/Clones.sol";
-import {Ownable} from "@openzeppelin-contracts-5.0.2/access/Ownable.sol";
+import {Clones} from "@openzeppelin-contracts-4.9.5/proxy/Clones.sol";
+import {Ownable} from "@openzeppelin-contracts-4.9.5/access/Ownable.sol";
 
 contract ReviewPoolFactory is Ownable {
     using Clones for address;
@@ -17,7 +17,7 @@ contract ReviewPoolFactory is Ownable {
 
     event ReviewPoolCreated(uint256 indexed reviewPoolId, address indexed reviewPoolAddress);
 
-    constructor(address _reviewPoolImplementation, address _reviewerSBTAddress) Ownable(msg.sender) {
+    constructor(address _reviewPoolImplementation, address _reviewerSBTAddress) {
         reviewPoolImplementation = _reviewPoolImplementation;
         REVIEWER_SBT_ADDRESS = _reviewerSBTAddress;
     }
