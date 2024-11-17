@@ -47,7 +47,7 @@ export default function FileUpload({ setPaperLink }: FileUploadProps) {
       formData.append("file", renamedFile);
 
       const response = await fetch(
-        "http://3.10.209.79:8000/buckets/dereview/files",
+        `${process.env.NEXT_PUBLIC_AKAVE_API_URL}/buckets/dereview/files`,
         {
           method: "POST",
           body: formData,
